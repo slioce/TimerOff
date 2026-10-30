@@ -1,0 +1,64 @@
+<Window x:Class="TimerOff.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TimerOff"
+        Title="{x:Static local:Strings.Title}"
+        Width="380" Height="470" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Closing="OnClosing">
+    <Window.Resources>
+        <Style x:Key="Preset" TargetType="Button">
+            <Setter Property="Height" Value="64" />
+            <Setter Property="Margin" Value="6" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="Field" TargetType="TextBox">
+            <Setter Property="Width" Value="52" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="6,0" />
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="24,20">
+        <!-- Idle: choose when -->
+        <StackPanel x:Name="IdleView">
+            <TextBlock Text="{x:Static local:Strings.Tagline}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+            <UniformGrid Columns="2" Margin="-6,0">
+                <Button Style="{StaticResource Preset}" Content="{x:Static local:Strings.Minutes15}" Tag="15" Click="OnPreset" />
+                <Button Style="{StaticResource Preset}" Content="{x:Static local:Strings.Minutes30}" Tag="30" Click="OnPreset" />
+                <Button Style="{StaticResource Preset}" Content="{x:Static local:Strings.Hour1}" Tag="60" Click="OnPreset" />
+                <Button Style="{StaticResource Preset}" Content="{x:Static local:Strings.Hours2}" Tag="120" Click="OnPreset" />
+            </UniformGrid>
+
+            <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                <RadioButton x:Name="AfterMode" IsChecked="True" Content="{x:Static local:Strings.AfterDuration}" Width="70" VerticalContentAlignment="Center" />
+                <TextBox x:Name="HoursBox" Style="{StaticResource Field}" Text="0" />
+                <TextBlock Style="{StaticResource FieldLabel}" Text="{x:Static local:Strings.Hours}" />
+                <TextBox x:Name="MinutesBox" Style="{StaticResource Field}" Text="30" />
+                <TextBlock Style="{StaticResource FieldLabel}" Text="{x:Static local:Strings.MinutesShort}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <RadioButton x:Name="AtMode" Content="{x:Static local:Strings.AtTime}" Width="70" VerticalContentAlignment="Center" />
+                <TextBox x:Name="TimeBox" Style="{StaticResource Field}" Width="76" Text="23:00" GotFocus="OnTimeFocus" />
+            </StackPanel>
+
+            <TextBlock x:Name="ErrorText" Foreground="#D13438" Margin="0,12,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+            <Button Content="{x:Static local:Strings.Start}" Click="OnStart" IsDefault="True" HorizontalAlignment="Stretch" Height="40" Margin="0,16,0,0" FontSize="15" />
+        </StackPanel>
+
+        <!-- Armed: the countdown -->
+        <StackPanel x:Name="ArmedView" Visibility="Collapsed" VerticalAlignment="Center">
+            <TextBlock x:Name="ArmedLabel" HorizontalAlignment="Center" FontSize="15" Opacity="0.7" />
+            <TextBlock x:Name="CountdownText" HorizontalAlignment="Center" FontSize="64" FontWeight="Bold" Margin="0,4,0,8" />
+            <TextBlock x:Name="WarningText" Text="{x:Static local:Strings.SaveYourWork}" HorizontalAlignment="Center" FontSize="14" Foreground="#D13438" Visibility="Hidden" />
+            <Button Content="{x:Static local:Strings.Cancel}" Click="OnCancel" IsCancel="True" HorizontalAlignment="Stretch" Height="44" Margin="0,24,0,0" FontSize="16" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wraps the app in an MSIX package for the Microsoft Store and for sideloading. Builds on Windows only. -->
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
+  </PropertyGroup>
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
+  <PropertyGroup>
+    <ProjectGuid>8C5B3F3E-2D6A-4E0B-9B7C-1F2A6D3E4C01</ProjectGuid>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <EntryPointProjectUniqueName>..\TimerOff\TimerOff.csproj</EntryPointProjectUniqueName>
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxBundle>Never</AppxBundle>
+    <NoWarn>$(NoWarn);NU1702</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\TimerOff\Assets\Square44x44Logo.png" Link="Images\Square44x44Logo.png" />
+    <Content Include="..\TimerOff\Assets\Square150x150Logo.png" Link="Images\Square150x150Logo.png" />
+    <Content Include="..\TimerOff\Assets\Wide310x150Logo.png" Link="Images\Wide310x150Logo.png" />
+    <Content Include="..\TimerOff\Assets\StoreLogo.png" Link="Images\StoreLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TimerOff\TimerOff.csproj" />
+  </ItemGroup>
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
+</Project>

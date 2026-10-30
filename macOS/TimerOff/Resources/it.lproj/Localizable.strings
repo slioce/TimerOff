@@ -1,0 +1,27 @@
+/* Menu */
+"Shut Down in %lld Minutes" = "Spegni tra %lld minuti";
+"Shut Down in 1 Hour" = "Spegni tra 1 ora";
+"Shut Down in 2 Hours" = "Spegni tra 2 ore";
+"Custom…" = "Personalizzato…";
+"Shutting down at %@" = "Spegnimento alle %@";
+"Shutting down tomorrow at %@" = "Spegnimento domani alle %@";
+"Cancel Timer" = "Annulla timer";
+"Quit TimerOff" = "Esci da TimerOff";
+
+/* Custom timer window */
+"Custom Timer" = "Timer personalizzato";
+"After a duration" = "Dopo una durata";
+"At a time" = "A un orario";
+"Shut down at" = "Spegni alle";
+"Start" = "Avvia";
+"Cancel" = "Annulla";
+
+/* Warning panel */
+"Shutting down in %lld s" = "Spegnimento tra %lld s";
+"Save your work, or cancel the timer." = "Salva il tuo lavoro, o annulla il timer.";
+"Cancel Shutdown" = "Annulla spegnimento";
+
+/* Automation permission */
+"TimerOff needs permission to shut down the Mac" = "TimerOff ha bisogno del permesso per spegnere il Mac";
+"Allow TimerOff to control System Events in System Settings › Privacy & Security › Automation, then set the timer again." = "Consenti a TimerOff di controllare Eventi di Sistema in Impostazioni di Sistema › Privacy e sicurezza › Automazione, poi imposta di nuovo il timer.";
+"Open System Settings" = "Apri Impostazioni di Sistema";

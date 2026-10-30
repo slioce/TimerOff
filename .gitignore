@@ -1,0 +1,17 @@
+# Xcode and Swift Package Manager
+macOS/build/
+DerivedData/
+.build/
+.swiftpm/
+xcuserdata/
+macOS/Config/Local.xcconfig
+
+# .NET and Visual Studio
+bin/
+obj/
+.vs/
+*.user
+Windows/AppPackages/
+Windows/**/BundleArtifacts/
+
+.DS_Store

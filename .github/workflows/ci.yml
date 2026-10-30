@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test the timer logic
+        run: swift test --package-path macOS/TimerOffCore
+      - name: Build the app
+        run: xcodebuild -project macOS/TimerOff.xcodeproj -scheme TimerOff -destination generic/platform=macOS -configuration Release -derivedDataPath macOS/build build
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test the timer logic
+        run: dotnet test Windows/TimerOff.Core.Tests
+      - uses: microsoft/setup-msbuild@v2
+      - name: Build the app and its MSIX package
+        run: msbuild Windows/TimerOff.sln /restore /p:Configuration=Release /p:Platform=x64 /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TimerOff-msix
+          path: Windows/TimerOff.Package/AppPackages/**/*.msix
