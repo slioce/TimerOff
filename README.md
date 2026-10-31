@@ -8,14 +8,14 @@ A small shutdown timer for macOS and Windows. Pick a preset, a duration or a tim
 - **Always cancellable**: the remaining time is in view the whole time, with a Cancel next to it. Nothing is sent to the system until the countdown reaches zero.
 - **Thirty-second warning**: a panel comes to the front with the countdown in red, a sound, and a Cancel button.
 - **Graceful shutdown**: the same request as the Shut Down menu, so apps get to save and quit.
-- **Native and light**: a menu bar app on macOS (about 1 MB, around 12 MB of memory), a tray app on Windows. No third-party dependencies, no network access.
+- **Native and light**: AppKit on macOS (about 1 MB, around 12 MB of memory), WPF on Windows; both keep running in the menu bar or notification area when the window is closed. No third-party dependencies, no network access.
 - Localized in English and Italian.
 
 ## macOS
 
 Requires macOS 15 or later, on Apple Silicon or Intel.
 
-TimerOff lives in the menu bar, with no Dock icon. Click the power symbol and choose **Shut Down in 15 Minutes** (or 30 minutes, 1 hour, 2 hours), or **Custom…** for a duration or a time of day. The remaining time appears next to the symbol; open the menu again for **Cancel Timer**.
+TimerOff opens as a small window, with no Dock icon: click a preset, or enter a duration or a time of day and press **Start**. The countdown takes the place of the choices, with Cancel underneath. Closing the window keeps the timer running in the menu bar, where the remaining time appears next to the power symbol. Click the symbol to show the window again; right-click it for **Show TimerOff**, **Cancel timer** and **Quit TimerOff**.
 
 The first time you set a timer, macOS asks whether TimerOff may control **System Events**: that is how the app shuts the Mac down, so answer Allow. If you denied it, turn it on in System Settings › Privacy & Security › Automation.
 
@@ -56,7 +56,7 @@ Set `TIMEROFF_DRYRUN=1` to try the whole flow without shutting down: at zero the
 ## Project layout
 
 ```
-macOS/TimerOff/            The app: menu bar item, custom timer window, warning panel, shutdown.
+macOS/TimerOff/            The app: main window, menu bar item, shutdown.
 macOS/TimerOff/Resources/  Info.plist, entitlements, privacy manifest, icon, localizations.
 macOS/TimerOffCore/        Swift package with the timer logic and its tests. No AppKit, no UI.
 macOS/Config/              Build settings shared by every configuration (xcconfig).

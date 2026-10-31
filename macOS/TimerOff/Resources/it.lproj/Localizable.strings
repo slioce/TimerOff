@@ -1,25 +1,24 @@
-/* Menu */
-"Shut Down in %lld Minutes" = "Spegni tra %lld minuti";
-"Shut Down in 1 Hour" = "Spegni tra 1 ora";
-"Shut Down in 2 Hours" = "Spegni tra 2 ore";
-"Custom…" = "Personalizzato…";
+/* Window */
+"Shut down this Mac later" = "Spegni questo Mac più tardi";
+"15 minutes" = "15 minuti";
+"30 minutes" = "30 minuti";
+"1 hour" = "1 ora";
+"2 hours" = "2 ore";
+"After" = "Dopo";
+"At" = "Alle";
+"Start" = "Avvia";
+"Enter a duration of at least one minute." = "Inserisci una durata di almeno un minuto.";
 "Shutting down at %@" = "Spegnimento alle %@";
 "Shutting down tomorrow at %@" = "Spegnimento domani alle %@";
-"Cancel Timer" = "Annulla timer";
-"Quit TimerOff" = "Esci da TimerOff";
-
-/* Custom timer window */
-"Custom Timer" = "Timer personalizzato";
-"After a duration" = "Dopo una durata";
-"At a time" = "A un orario";
-"Shut down at" = "Spegni alle";
-"Start" = "Avvia";
+"Save your work, or cancel the timer." = "Salva il tuo lavoro, o annulla il timer.";
 "Cancel" = "Annulla";
 
-/* Warning panel */
-"Shutting down in %lld s" = "Spegnimento tra %lld s";
-"Save your work, or cancel the timer." = "Salva il tuo lavoro, o annulla il timer.";
-"Cancel Shutdown" = "Annulla spegnimento";
+/* Menu bar item */
+"Show TimerOff" = "Mostra TimerOff";
+"Cancel timer" = "Annulla timer";
+"Quit TimerOff" = "Esci da TimerOff";
+"No timer set" = "Nessun timer impostato";
+"Shutting down in %@" = "Spegnimento tra %@";
 
 /* Automation permission */
 "TimerOff needs permission to shut down the Mac" = "TimerOff ha bisogno del permesso per spegnere il Mac";

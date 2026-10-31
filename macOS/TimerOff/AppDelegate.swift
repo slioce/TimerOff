@@ -3,7 +3,7 @@ import TimerOffCore
 
 @main
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// There is no main nib, so `NSApplicationMain` would never create the delegate.
     /// `NSApplication.delegate` is weak, so the instance must outlive `run()`.
     static func main() {
@@ -13,102 +13,121 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         withExtendedLifetime(delegate) { app.run() }
     }
 
-    private static let presets = [15, 30, 60, 120]
-
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let countdown = Countdown()
-    private let statusLine = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-    private let cancelItem = NSMenuItem(title: String(localized: "Cancel Timer"), action: #selector(cancelTimer), keyEquivalent: "")
-    private lazy var customWindow = CustomTimerWindow { [weak self] trigger in self?.arm(trigger) }
-    private lazy var warningPanel = WarningPanel { [weak self] in self?.cancelTimer() }
+    private let menu = NSMenu()
+    private let cancelItem = NSMenuItem(title: String(localized: "Cancel timer"), action: #selector(cancelTimer), keyEquivalent: "")
+    private lazy var mainWindow = MainWindow()
+    private var arming = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let menu = NSMenu()
-        menu.autoenablesItems = false
-        for minutes in Self.presets {
-            let item = NSMenuItem(title: Self.presetTitle(minutes: minutes), action: #selector(armPreset(_:)), keyEquivalent: "")
-            item.target = self
-            item.tag = minutes
-            menu.addItem(item)
-        }
-        let custom = NSMenuItem(title: String(localized: "Custom…"), action: #selector(openCustom), keyEquivalent: "")
-        custom.target = self
-        cancelItem.target = self
-        statusLine.isEnabled = false
-        let quit = NSMenuItem(title: String(localized: "Quit TimerOff"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        menu.items += [custom, .separator(), statusLine, cancelItem, .separator(), quit]
-        statusItem.menu = menu
-        statusItem.button?.imagePosition = .imageLeading
+        NSApp.mainMenu = Self.hiddenMainMenu()
 
+        // The menu on the status item mirrors the Windows tray menu; it opens on a right click.
+        menu.autoenablesItems = false
+        menu.delegate = self
+        let show = NSMenuItem(title: String(localized: "Show TimerOff"), action: #selector(showWindow), keyEquivalent: "")
+        show.target = self
+        cancelItem.target = self
+        let quit = NSMenuItem(title: String(localized: "Quit TimerOff"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        menu.items = [show, cancelItem, .separator(), quit]
+
+        if let button = statusItem.button {
+            button.imagePosition = .imageLeading
+            button.target = self
+            button.action = #selector(statusItemClicked)
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        }
+
+        mainWindow.onStart = { [weak self] trigger in self?.arm(trigger) }
+        mainWindow.onCancel = { [weak self] in self?.cancelTimer() }
         countdown.onTick = { [weak self] remaining in self?.showRemaining(remaining) }
-        countdown.onWarning = { [weak self] remaining in self?.warningPanel.show(remaining: remaining) }
+        countdown.onWarning = { [weak self] _ in self?.mainWindow.showWarning() }
         countdown.onFire = { [weak self] in
-            self?.warningPanel.hide()
             self?.showIdle()
             PowerControl.shutDown()
         }
         showIdle()
+        mainWindow.show()
     }
 
     // MARK: Arming
 
-    @objc private func armPreset(_ sender: NSMenuItem) {
-        arm(.after(minutes: sender.tag))
-    }
-
-    @objc private func openCustom() {
-        customWindow.show()
-    }
-
     private func arm(_ trigger: Trigger) {
-        guard let target = try? trigger.targetDate() else { return }
+        guard !arming, let target = try? trigger.targetDate() else { return }
+        arming = true
         Task {
+            defer { arming = false }
             guard await PowerControl.requestPermission() else { return showPermissionAlert() }
+            mainWindow.showArmed(target: target)
             countdown.arm(target: target)
-            statusLine.title = Self.statusTitle(for: target)
-            statusLine.isHidden = false
-            cancelItem.isHidden = false
+            cancelItem.isEnabled = true
         }
     }
 
     @objc private func cancelTimer() {
         countdown.cancel()
-        warningPanel.hide()
         showIdle()
     }
 
     // MARK: Menu bar
 
+    @objc private func statusItemClicked() {
+        let event = NSApp.currentEvent
+        if event?.type == .rightMouseUp || event?.modifierFlags.contains(.control) == true {
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+        } else {
+            mainWindow.show()
+        }
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        statusItem.menu = nil // back to the click action
+    }
+
+    @objc private func showWindow() {
+        mainWindow.show()
+    }
+
     private func showIdle() {
         statusItem.button?.image = NSImage(systemSymbolName: "power", accessibilityDescription: "TimerOff")
         statusItem.button?.attributedTitle = NSAttributedString()
-        statusLine.isHidden = true
-        cancelItem.isHidden = true
+        statusItem.button?.toolTip = "TimerOff – " + String(localized: "No timer set")
+        cancelItem.isEnabled = false
+        mainWindow.showIdle()
     }
 
     private func showRemaining(_ remaining: Int) {
         let urgent = remaining <= countdown.warningSeconds
+        let clock = formatRemaining(remaining)
         statusItem.button?.image = NSImage(systemSymbolName: urgent ? "power.circle.fill" : "power", accessibilityDescription: "TimerOff")
-        statusItem.button?.attributedTitle = NSAttributedString(string: " " + formatRemaining(remaining), attributes: [
+        statusItem.button?.attributedTitle = NSAttributedString(string: " " + clock, attributes: [
             .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular),
             .foregroundColor: urgent ? NSColor.systemRed : NSColor.labelColor,
         ])
-        if urgent { warningPanel.update(remaining: remaining) }
+        statusItem.button?.toolTip = "TimerOff – " + String(localized: "Shutting down in \(clock)")
+        mainWindow.update(remaining: remaining)
     }
 
-    private static func presetTitle(minutes: Int) -> String {
-        switch minutes {
-        case 60: String(localized: "Shut Down in 1 Hour")
-        case 120: String(localized: "Shut Down in 2 Hours")
-        default: String(localized: "Shut Down in \(minutes) Minutes")
+    /// An agent app shows no menu bar, but a main menu still routes the standard shortcuts in the window.
+    private static func hiddenMainMenu() -> NSMenu {
+        let main = NSMenu()
+        let app = NSMenu()
+        app.addItem(withTitle: String(localized: "Quit TimerOff"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let edit = NSMenu(title: "Edit")
+        edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let window = NSMenu(title: "Window")
+        window.addItem(withTitle: "Close", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        for submenu in [app, edit, window] {
+            let item = NSMenuItem()
+            item.submenu = submenu
+            main.addItem(item)
         }
-    }
-
-    private static func statusTitle(for target: Date) -> String {
-        if Calendar.current.isDateInToday(target) {
-            return String(localized: "Shutting down at \(target.formatted(date: .omitted, time: .shortened))")
-        }
-        return String(localized: "Shutting down tomorrow at \(target.formatted(date: .omitted, time: .shortened))")
+        return main
     }
 
     private func showPermissionAlert() {
@@ -117,7 +136,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.informativeText = String(localized: "Allow TimerOff to control System Events in System Settings › Privacy & Security › Automation, then set the timer again.")
         alert.addButton(withTitle: String(localized: "Open System Settings"))
         alert.addButton(withTitle: String(localized: "Cancel"))
-        NSApp.activate()
+        NSApp.activate(ignoringOtherApps: true) // see MainWindow.show()
         if alert.runModal() == .alertFirstButtonReturn,
            let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
             NSWorkspace.shared.open(url)
